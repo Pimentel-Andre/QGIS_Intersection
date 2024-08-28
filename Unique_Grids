@@ -1,0 +1,41 @@
+# Gerando shp único para cada grade, mantendo a tabela de atributos
+
+from qgis.core import (
+    QgsProject,
+    QgsVectorLayer,
+    QgsFeatureRequest,
+    QgsVectorFileWriter 
+) 
+import os
+
+# Caminho do shapefile e do diretório de saída
+input_shapefile = r'seu-caminho\World_UTM_Grid.shp'
+output_directory = r'pasta-de-destino'  # nessa pasta, serão enviadas todos as grades individuais
+
+# Carrego o shapefile original 
+layer = QgsVectorLayer(input_shapefile, "original_layer", "ogr")
+
+# Verifico se a camada foi carregada corretamente
+if not layer.isValid():
+    print("Erro ao carregar o shapefile.")
+else:
+    print("Shapefile carregado com sucesso.")
+
+# Itero cada linha na camada
+for feature in layer.getFeatures():
+    # Extrai o ID ou outro atributo para nomear o novo shapefile
+    feature_id = feature['ÍNDICE']  # Ou use um atributo específico, como feature['nome_do_atributo']
+    
+    # Cria um filtro para selecionar apenas a linha atual
+    request = QgsFeatureRequest().setFilterFid(feature['ÍNDICE'])
+    sub_layer = layer.materialize(QgsFeatureRequest(request))
+
+    # Define o caminho de saída do novo shapefile
+    output_shapefile = os.path.join(output_directory, f'feature_{feature_id}.shp')
+
+    # Escreve o novo shapefile
+    QgsVectorFileWriter.writeAsVectorFormat(sub_layer, output_shapefile, "UTF-8", driverName="ESRI Shapefile")
+
+    print(f'Shapefile gerado: {output_shapefile}')
+
+print("Processo concluído.")
