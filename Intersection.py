@@ -1,4 +1,4 @@
-# Gerando intersecção
+# Gerando interseção
 
 from qgis.core import (
     QgsVectorLayer,
